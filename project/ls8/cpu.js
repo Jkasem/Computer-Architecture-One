@@ -68,8 +68,7 @@ class CPU {
         // from the memory address pointed to by the PC. (I.e. the PC holds the
         // index into memory of the instruction that's about to be executed
         // right now.)
-
-        const IR = ram[PC];
+        const IR = this.ram.mem[this.PC];
 
         // Debugging output
         //console.log(`${this.PC}: ${IR.toString(2)}`);
@@ -77,30 +76,31 @@ class CPU {
         // Get the two bytes in memory _after_ the PC in case the instruction
         // needs them.
 
-        const operandA = this.ram.read(PC + 1);
-        const operandB = this.ram.read(PC + 2);
+        const operandA = this.ram.read(this.PC + 1);
+        const operandB = this.ram.read(this.PC + 2);
 
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
-
         switch(IR) {
-            case 10011001:
-                ram.write(operandA, operandB);
+
+            //PRN
+            case 67:
+                console.log(this.ram.read(operandA));
                 break;
-            
+
+            //HLT
+            case 1:
+                this.stopClock();
+                break;
+
+            //LDI
+            case 153:
+                this.ram.write(operandA, operandB);
+                break;
+
             default:
-            console.log('error');
-            // ### LDI
-
-// `LDI register immediate`
-
-// Set the value of a register to an integer.
-
-// Machine code:
-// ```
-// 10011001 00000rrr iiiiiiii
-// ```
-
+                console.log('error');
+                break;
 
 //             ### ADD
 
@@ -183,17 +183,6 @@ class CPU {
 // Machine code:
 // ```
 // 10101011 00000aaa 00000bbb
-// ```
-
-// ### HLT
-
-// `HLT`
-
-// Halt the CPU (and exit the emulator).
-
-// Machine code:
-// ```
-// 00000001 
 // ```
 
 // ### INC
@@ -400,20 +389,6 @@ class CPU {
 // 01000010 00000rrr
 // ```
 
-// ### PRN
-
-// `PRN register` pseudo-instruction
-
-// Print numeric value stored in the given register.
-
-// Print to the console the decimal integer value that is stored in the given
-// register.
-
-// Machine code:
-// ```
-// 01000011 00000rrr
-// ```
-
 // ### PUSH
 
 // `PUSH register`
@@ -483,8 +458,9 @@ class CPU {
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
-        
-        this.PC = this.PC + parseInt(IR.slice(0, 2), 2);
+        let increment = IR.toString(2);
+        while (increment.length < 8) increment = "0" + increment;
+        this.PC = (this.PC + 1) + parseInt(increment.slice(0, 2), 2);
     }
 }
 
