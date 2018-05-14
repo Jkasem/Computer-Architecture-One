@@ -83,6 +83,12 @@ class CPU {
         // outlined in the LS-8 spec.
         switch(IR) {
 
+            //MUL
+            case 170:
+                // call ALU
+                this.ram.write(operandA, (this.ram.read(operandA) * this.ram.read(operandB)));
+                break;
+
             //PRN
             case 67:
                 console.log(this.ram.read(operandA));

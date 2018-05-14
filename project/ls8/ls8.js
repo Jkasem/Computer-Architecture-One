@@ -11,12 +11,18 @@ function loadMemory() {
     // Hardcoded program to print the number 8 on the console
 
     const program = [ // print8.ls8
-        "10011001", // LDI R0,8  Store 8 into R0
+        "10011001",
         "00000000",
         "00001000",
-        "01000011", // PRN R0    Print the value in R0
+        "10011001",
+        "00000001",
+        "00001001",
+        "10101010",
         "00000000",
-        "00000001"  // HLT       Halt and quit
+        "00000001",
+        "01000011",
+        "00000000",
+        "00000001"
     ];
 
     // Load the program into the CPU's memory a byte at a time
