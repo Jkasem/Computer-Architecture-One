@@ -17,6 +17,7 @@ class CPU {
         
         // Special-purpose registers
         this.PC = 0; // Program Counter
+        this.FL = 0b00000000; //flag
     }
     
     /**
@@ -54,8 +55,37 @@ class CPU {
      */
     alu(op, regA, regB) {
         switch (op) {
+            case 'ADD':
+                return (this.ram.read(regA) + this.ram.read(regB));
+                break;
+            case 'SUB':
+                return (this.ram.read(regA) - this.ram.read(regB));
+                break;
             case 'MUL':
-                // !!! IMPLEMENT ME
+                return (this.ram.read(regA) * this.ram.read(regB));
+                break;
+            case 'DIV':
+                if (this.ram.read(regB) === 0) {
+                    process.exit();
+                    console.error('no divide by 0')
+                }
+                else return (this.ram.read(regA) / this.ram.read(regB));
+                break;
+            case 'INC':
+                return (this.ram.read(regA) + 1);
+                break;
+            case 'DEC':
+                return (this.ram.read(regA) - 1);
+                break;
+            case 'CMP':
+                // * If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
+                if (regA === regB) this.FL = 0b00000001;
+                // * If registerA is less than registerB, set the Less-than `L` flag to 1,
+                //   otherwise set it to 0.
+                if (regA < regB) this.FL = 0b00000100;
+                // * If registerA is greater than registerB, set the Greater-than `G` flag
+                //   to 1, otherwise set it to 0.
+                if (regA > regB) this.FL = 0b00000010;
                 break;
         }
     }
@@ -83,10 +113,39 @@ class CPU {
         // outlined in the LS-8 spec.
         switch(IR) {
 
+            //ADD
+            case 168:
+                this.ram.write(operandA, this.alu('ADD', operandA, operandB));
+                break;
+
+            //DEC
+            case 121:
+                this.ram.write(operandA, this.alu('DEC', operandA));
+                break;
+
+            //DIV
+            case 171:
+                this.ram.write(operandA, this.alu('DIV', operandA, operandB));
+                break;
+
+            //INC
+            case 120:
+                this.ram.write(operandA, this.alu('INC', operandA));
+                break;
+
             //MUL
             case 170:
-                // call ALU
-                this.ram.write(operandA, (this.ram.read(operandA) * this.ram.read(operandB)));
+                this.ram.write(operandA, this.alu('MUL', operandA, operandB));
+                break;
+
+            //CMP
+            case 160:
+                this.alu('CMP', operandA, operandB);
+                break;
+
+            //SUB
+            case 169:
+                this.ram.write(operandA, this.alu('SUB', operandA, operandB));
                 break;
 
             //PRN
@@ -108,16 +167,6 @@ class CPU {
                 console.log('error');
                 break;
 
-//             ### ADD
-
-// `ADD registerA registerB`
-
-// Add two registers and store the result in registerA.
-
-// Machine code:
-// ```
-// 10101000 00000aaa 00000bbb
-// ```
 
 // ### AND
 
@@ -144,62 +193,6 @@ class CPU {
 // Machine code:
 // ```
 // 01001000 00000rrr
-// ```
-
-// ### CMP
-
-// `CMP registerA registerB`
-
-// Compare the value in two registers.
-
-// * If they are equal, set the Equal `E` flag to 1, otherwise set it to 0.
-
-// * If registerA is less than registerB, set the Less-than `L` flag to 1,
-//   otherwise set it to 0.
-
-// * If registerA is greater than registerB, set the Greater-than `G` flag
-//   to 1, otherwise set it to 0.
-
-// Machine code:
-// ```
-// 10100000 00000aaa 00000bbb
-// ```
-
-// ### DEC
-
-// `DEC register`
-
-// Decrement (subtract 1 from) the value in the given register.
-
-// Machine code:
-// ```
-// 01111001 00000rrr
-// ```
-
-// ### DIV
-
-// `DIV registerA registerB`
-
-// Divide the value in the first register by the value in the second,
-// storing the result in registerA.
-
-// If the value in the second register is 0, the system should print an
-// error message and halt.
-
-// Machine code:
-// ```
-// 10101011 00000aaa 00000bbb
-// ```
-
-// ### INC
-
-// `INC register`
-
-// Increment (add 1 to) the value in the given register.
-
-// Machine code:
-// ```
-// 01111000 00000rrr
 // ```
 
 // ### INT
@@ -322,17 +315,6 @@ class CPU {
 // 10101100 00000aaa 00000bbb
 // ```
 
-// ### MUL
-
-// `MUL registerA registerB`
-
-// Multiply two registers together and store the result in registerA.
-
-// Machine code:
-// ```
-// 10101010 00000aaa 00000bbb
-// ```
-
 // ### NOP
 
 // `NOP`
@@ -434,18 +416,6 @@ class CPU {
 // Machine code:
 // ```
 // 10011010 00000aaa 00000bbb
-// ```
-
-// ### SUB
-
-// `SUB registerA registerB`
-
-// Subtract the value in the second register from the first, storing the
-// result in registerA.
-
-// Machine code:
-// ```
-// 10101001 00000aaa 00000bbb
 // ```
 
 // ### XOR
