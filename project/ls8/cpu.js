@@ -14,7 +14,7 @@ class CPU {
         this.ram = ram;
 
         this.reg = new Array(8).fill(0); // General-purpose registers R0-R7
-        
+        this.reg[7] = 0xf4;
         // Special-purpose registers
         this.PC = 0; // Program Counter
         this.FL = 0b00000000; //flag
@@ -163,6 +163,29 @@ class CPU {
                 this.ram.write(operandA, operandB);
                 break;
 
+            //CALL
+            case 72:
+            // Calls a subroutine (function) at the address stored in the register.
+
+            // 1. The address of the _next_ instruction that will execute is pushed onto the
+            //    stack.
+            // 2. The PC is set to the address stored in the given register.
+                
+                break;
+
+            //PUSH
+            case 77:
+                this.reg[7]--;
+                this.ram.write(this.reg[7], this.ram.read(operandA));
+                break;
+
+            //POP
+            case 76:
+                const current = this.ram.read(this.reg[7]);
+                this.ram.write(operandA, current);
+                this.reg[7]++;
+                break;
+
             default:
                 console.log('error');
                 break;
@@ -178,21 +201,6 @@ class CPU {
 // Machine code:
 // ```
 // 10110011 00000aaa 00000bbb
-// ```
-
-// ### CALL register
-
-// `CALL register`
-
-// Calls a subroutine (function) at the address stored in the register.
-
-// 1. The address of the _next_ instruction that will execute is pushed onto the
-//    stack.
-// 2. The PC is set to the address stored in the given register.
-
-// Machine code:
-// ```
-// 01001000 00000rrr
 // ```
 
 // ### INT
@@ -349,20 +357,6 @@ class CPU {
 // 10110001 00000aaa 00000bbb
 // ```
 
-// ### POP
-
-// `POP register`
-
-// Pop the value at the top of the stack into the given register.
-
-// 1. Copy the value from the address pointed to by `SP` to the given register.
-// 2. Increment `SP`.
-
-// Machine code:
-// ```
-// 01001100 00000rrr
-// ```
-
 // ### PRA
 
 // `PRA register` pseudo-instruction
@@ -375,21 +369,6 @@ class CPU {
 // Machine code:
 // ```
 // 01000010 00000rrr
-// ```
-
-// ### PUSH
-
-// `PUSH register`
-
-// Push the given register on the stack.
-
-// 1. Decrement the `SP`.
-// 2. Copy the value in the given register to the address pointed to by
-//    `SP`.
-
-// Machine code:
-// ```
-// 01001101 00000rrr
 // ```
 
 // ### RET
