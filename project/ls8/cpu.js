@@ -109,6 +109,8 @@ class CPU {
         const operandA = this.ram.read(this.PC + 1);
         const operandB = this.ram.read(this.PC + 2);
 
+        let continueNext = true;
+
         // Execute the instruction. Perform the actions for the instruction as
         // outlined in the LS-8 spec.
         switch(IR) {
@@ -165,12 +167,17 @@ class CPU {
 
             //CALL
             case 72:
-            // Calls a subroutine (function) at the address stored in the register.
+                this.reg[7]--;
+                this.ram.write(this.reg[7], this.PC + 2);
+                this.PC = this.ram.read(operandA);
+                continueNext = false;
+                break;
 
-            // 1. The address of the _next_ instruction that will execute is pushed onto the
-            //    stack.
-            // 2. The PC is set to the address stored in the given register.
-                
+            //RET
+            case 0b00001001:
+                this.PC = this.ram.read(this.reg[7]);
+                this.reg[7]++;
+                continueNext = false;
                 break;
 
             //PUSH
@@ -181,8 +188,7 @@ class CPU {
 
             //POP
             case 76:
-                const current = this.ram.read(this.reg[7]);
-                this.ram.write(operandA, current);
+                this.ram.write(operandA, this.ram.read(this.reg[7]));
                 this.reg[7]++;
                 break;
 
@@ -371,19 +377,6 @@ class CPU {
 // 01000010 00000rrr
 // ```
 
-// ### RET
-
-// `RET`
-
-// Return from subroutine.
-
-// Pop the value from the top of the stack and store it in the `PC`.
-
-// Machine Code:
-// ```
-// 00001001
-// ```
-
 // ### ST
 
 // `ST registerA registerB`
@@ -413,9 +406,11 @@ class CPU {
         // can be 1, 2, or 3 bytes long. Hint: the high 2 bits of the
         // instruction byte tells you how many bytes follow the instruction byte
         // for any particular instruction.
-        let increment = IR.toString(2);
-        while (increment.length < 8) increment = "0" + increment;
-        this.PC = (this.PC + 1) + parseInt(increment.slice(0, 2), 2);
+        if (continueNext) {
+            let increment = IR.toString(2);
+            while (increment.length < 8) increment = "0" + increment;
+            this.PC = (this.PC + 1) + parseInt(increment.slice(0, 2), 2);
+        }
     }
 }
 
