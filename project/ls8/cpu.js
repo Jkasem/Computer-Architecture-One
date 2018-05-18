@@ -71,6 +71,13 @@ class CPU {
                 }
                 else return (this.ram.read(regA) / this.ram.read(regB));
                 break;
+            case 'MOD':
+                if (this.ram.read(regB) === 0) {
+                    process.exit();
+                    console.error('no divide by 0')
+                }
+                else return (this.ram.read(regA) % this.ram.read(regB));
+                break;
             case 'INC':
                 return (this.ram.read(regA) + 1);
                 break;
@@ -142,7 +149,7 @@ class CPU {
 
             //CMP
             case 160:
-                this.alu('CMP', operandA, operandB);
+                this.alu('CMP', this.ram.read(operandA), this.ram.read(operandB));
                 break;
 
             //SUB
@@ -192,176 +199,128 @@ class CPU {
                 this.reg[7]++;
                 break;
 
-            default:
-                console.log('error');
+            //JMP
+            case 0b01010000:
+                this.PC = this.ram.read(operandA);
+                continueNext = false;
                 break;
 
+            //JEQ
+            case 0b01010001:
+                if (this.FL === 1) {
+                    this.PC = this.ram.read(operandA);
+                    continueNext = false;
+                }
+                break;
 
-// ### AND
+            //JNE
+            case 0b001010010:
+                if (this.FL != 1) {
+                    this.PC = this.ram.read(operandA);
+                    continueNext = false;
+                }
+                break;
 
-// `AND registerA registerB`
+            //AND
+            case 0b10110011:
+                this.ram.write(operandA, this.ram.read(operandA) & this.ram.read(operandB));
+                break;
 
-// Bitwise-AND registerA and registerB, then store the result in
-// registerA.
+            //JGT
+            case 0b01010100:
+                if (this.FL === 2) {
+                    this.PC = this.ram.read(operandA);
+                    continueNext = false;
+                }
+                break;
 
-// Machine code:
-// ```
-// 10110011 00000aaa 00000bbb
-// ```
+            //JLT
+            case 0b01010011:
+                if (this.FL === 4) {
+                    this.PC = this.ram.read(operandA);
+                    continueNext = false;
+                }
+                break;
 
-// ### INT
+            //LD
+            case 0b10011000:
+                this.ram.write(operandB, this.ram.read(operandA));
+                break;
 
-// `INT register`
+            //MOD
+            case 0b10101100:
+                this.ram.write(operandA, this.alu('MOD', operandA, operandB));
+                break;
 
-// Issue the interrupt number stored in the given register.
+            //NOP
+            case 0b00000000:
+                break;
 
-// This will set the _n_th bit in the `IS` register to the value in the given
-// register.
+            //NOT
+            case 0b01110000:
+                this.ram.write(operandA, ~ this.ram.read(operandA));
+                break;
 
-// Machine code:
-// ```
-// 01001010 00000rrr
-// ```
+            //OR
+            case 0b10110001:
+                this.ram.write(operandA, this.ram.read(operandA) | this.ram.read(operandB));
+                break;
 
-// ### IRET
+            //ST
+            case 0b10011010:
+                this.ram.write(operandA, this.ram.read(operandB));
+                break;
 
-// `IRET`
+            //XOR
+            case 0b10110010:
+                this.ram.write(operandA, this.ram.read(operandA) ^ this.ram.read(operandB));
+                break;
 
-// Return from an interrupt handler.
+            // ### INT
 
-// The following steps are executed:
+            // `INT register`
 
-// 1. Registers R6-R0 are popped off the stack in that order.
-// 2. The `FL` register is popped off the stack.
-// 3. The return address is popped off the stack and stored in `PC`.
-// 4. Interrupts are re-enabled
+            // Issue the interrupt number stored in the given register.
 
-// Machine code:
-// ```
-// 00001011
-// ```
+            // This will set the _n_th bit in the `IS` register to the value in the given
+            // register.
 
-// ### JEQ
+            // Machine code:
+            // ```
+            // 01001010 00000rrr
+            // ```
 
-// `JEQ register`
+            //INT
+            case 0b01001010:
+            this.ram.write(operandA, this.ram.read(this.reg[7]));
+            this.reg[7]++;
+            break;
 
-// If `equal` flag is set (true), jump to the address stored in the given register.
+            // ### IRET
 
-// Machine code:
-// ```
-// 01010001 00000rrr
-// ```
+            // `IRET`
 
-// ### JGT
+            // Return from an interrupt handler.
 
-// `JGT register`
+            // The following steps are executed:
 
-// If `greater-than` flag is set (true), jump to the address stored in the given
-// register.
+            // 1. Registers R6-R0 are popped off the stack in that order.
+            // 2. The `FL` register is popped off the stack.
+            // 3. The return address is popped off the stack and stored in `PC`.
+            // 4. Interrupts are re-enabled
 
-// Machine code:
-// ```
-// 01010100 00000rrr
-// ```
+            // Machine code:
+            // ```
+            // 00001011
+            // ```
 
-// ### JLT
 
-// `JLT register`
+            //IRET
+            case 0b00001011:
+            this.ram.write(operandA, this.ram.read(this.reg[7]));
+            this.reg[7]++;
+            break;
 
-// If `less-than` flag is set (true), jump to the address stored in the given
-// register.
-
-// Machine code:
-// ```
-// 01010011 00000rrr
-// ```
-
-// ### JMP
-
-// `JMP register`
-
-// Jump to the address stored in the given register.
-
-// Set the `PC` to the address stored in the given register.
-
-// Machine code:
-// ```
-// 01010000 00000rrr
-// ```
-
-// ### JNE
-
-// `JNE register`
-
-// If `E` flag is clear (false, 0), jump to the address stored in the given
-// register.
-
-// Machine code:
-// ```
-// 01010010 00000rrr
-// ```
-
-// ### LD
-
-// `LD registerA registerB`
-
-// Loads registerA with the value at the address stored in registerB.
-
-// This opcode reads from memory.
-
-// Machine code:
-// ```
-// 10011000 00000aaa 00000bbb
-// ```
-
-// ### MOD
-
-// `MOD registerA registerB`
-
-// Divide the value in the first register by the value in the second,
-// storing the _remainder_ of the result in registerA.
-
-// If the value in the second register is 0, the system should print an
-// error message and halt.
-
-// Machine code:
-// ```
-// 10101100 00000aaa 00000bbb
-// ```
-
-// ### NOP
-
-// `NOP`
-
-// No operation. Do nothing for this instruction.
-
-// Machine code:
-// ```
-// 00000000
-// ```
-
-// ### NOT
-
-// `NOT register`
-
-// Perform a bitwise-NOT on the value in a register.
-
-// Machine code:
-// ```
-// 01110000 00000rrr
-// ```
-
-// ### OR
-
-// `OR registerA registerB`
-
-// Perform a bitwise-OR between registerA and registerB, storing the
-// result in registerA.
-
-// Machine code:
-// ```
-// 10110001 00000aaa 00000bbb
-// ```
 
 // ### PRA
 
@@ -377,29 +336,16 @@ class CPU {
 // 01000010 00000rrr
 // ```
 
-// ### ST
 
-// `ST registerA registerB`
+//PRA
+case 0b01000010:
+this.ram.write(operandA, this.ram.read(this.reg[7]));
+this.reg[7]++;
+break;
 
-// Store value in registerB in the address stored in registerA.
-
-// This opcode writes to memory.
-
-// Machine code:
-// ```
-// 10011010 00000aaa 00000bbb
-// ```
-
-// ### XOR
-
-// `XOR registerA registerB`
-
-// Perform a bitwise-XOR between registerA and registerB, storing the
-// result in registerA.
-
-// Machine code:
-// ```
-// 10110010 00000aaa 00000bbb
+            default:
+                console.log('error');
+                break;
         }
 
         // Increment the PC register to go to the next instruction. Instructions
