@@ -190,43 +190,47 @@ phone. If no one is available, any house plant will do.
 
 * In industry terms, how many months does it take for the number of transistors
   on a chip to double?
-
+Moore's Law says the amount doubles about every 2 years, though this has slowed to 2.5-3 years recently. It is expected to end by 2025.
 * Why are registers necessary? Why not use RAM?
-
+Registers are temporary variables that the CPU needs quick access to because it is the current task. RAM is slower and holds the data and program instructions that are running.
 * Why is cache useful?
-
+A cache speeds everything up by storing recently used data so it can be accessed again quickly.
 * Why are interrupts useful?
-
+Interrupts allow slower processes to work independently and then tell the CPU when they are done. This means the CPU doesn't have to go check on them, they come to it when they are ready.
 * What are some examples of interrupts that might occur?
-
+Finishing grabbing data from memory, a mouse click, a keyboard click.
 * Describe what a CPU word is.
-
+The number of bits processed by the CPU in one go, the unit of data handled at once.
 * Describe what the system bus is and what size it is.
-
+The bus that connects all the major computer components together. It is made up of the control bus, address bus, and data bus. The size determines how much data can be transferred. A 32-bit system has 32 wires that can simultaneously transmit data.
 * Describe what a CPU instruction is.
-
+Tells the computer what to work on.
 * Describe what the CPU clock represents.
-
+The frequency at which a CPU runs. Its the number of pulses per second that sets the pace for the processor (GHz).
 * Describe what a CPU interrupt is.
-
-* Describe what kinds of pins enter and exit the CPU.
-
+A signal alterting the CPU that there is a high priority event that needs handling. The processor stops, saves its state, handles the interrupt, then returns to its previous state.
+* What kind of data enters and exits the CPU via the pins?
+  The pins take electrical signal that is either on (1) or off (0). One bit of information can flow through a pin every cycle.
 * Describe what DMA is.
-
+Direct Memory Access allows other hardware subsystem to access RAM independent of the CPU.
 * Say which peripherals are connected to the DMA bus.
-
+The DMA is connected to the video card, disk drive, sound card, and network card.
 * Say which peripherals are connected to the I/O bus.
-
+Mouse, keyboard, monitor, webcams.
 * Describe what L1, L2, and L3 caches are.
-
+Level 1 is split into data and instructions. It is on the CPU Chip.
+Level 2 is between CPU and RAM
+Level 3 if present is on the motherboard.
+Each level is closer to the core, smaller, and faster.
 * Describe caching and storage from L1 through cloud storage.
 
 * Describe what RAM is and its reponsibility in the system.
-
+Random Access Memory is the CPUs data storage. It allows data to be read and written in almost the same amount of time regardless of location in memory.
 * Describe what the hard disk is and its responsibility in the system.
-
+A hard disk is data storage using magnets. It has multiple rapidly moving disks. It persists data even when powered off. This gives it the responsibility of holding user data, OS, and any other data to be persisted.
 * Describe what the network interface card is responsible for in the system.
-
+Allows the data layer of Ethernet or Wi-Fi
 * Describe what the graphics card is responsible for in the system.
-
+The graphics card is responsible for feeding output to a display (monitor). They are dedicated to do a few very complex computations very quickly.
 * Suggest the role that graphics cards play in machine learning.
+Because they are good at doing complex computations quickly they can asssist in teaching a neural network many different inputs at one time.

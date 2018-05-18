@@ -230,19 +230,22 @@ Perform the following conversions by hand, then write JS code to convert them
 and check your work.
 
 * Convert 78 decimal to binary.
-
+1001110
 * Convert 1111 binary to decimal. Then convert 10000 binary to decimal.
   What conclusion can you make about binary numbers that end in a solid
   sequence of 1s?
-
+1 + 2 + 4 + 8 = 15
+0b10000 = 16
+Binary numbers that end in a sequence of 1's are always 1 less than the first place's value.
 * Convert 111 to binary.
-
+0b111 = 7
 * Convert 111 to hexadecimal.
-
+0b0111 = 0x7
 * Convert 0x10 to decimal.
-
+16
 * Convert 0xe2 to decimal.
-
+226
 * Convert 0xff to decimal.
-
+225
 * Convert 0x12345678 to binary.
+0001 0010 0011 0100 0101 0110 0111 1000
